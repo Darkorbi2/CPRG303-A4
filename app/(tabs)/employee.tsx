@@ -27,94 +27,96 @@ const MyForm = () => (
       jobTitle: "",
     }}
     validationSchema={SignupSchema}
-    onSubmit={(values) =>
+    onSubmit={(values, { resetForm }) => {
       Alert.alert(
         `Name: ${values.fullName}\nDoB: ${values.DoB}`,
         `Email: ${values.email}\nPhone: ${values.phoneNumber}\nTitle: ${values.jobTitle}`,
-      )
-    }
+      );
+      resetForm();
+    }}
   >
-    {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-      <View>
-        <TextInput
-          placeholder="Full Name"
-          onChangeText={handleChange("fullName")}
-          onBlur={handleBlur("fullName")}
-          value={values.fullName}
-          autoCapitalize="words"
-          style={{
-            borderWidth: 1,
-            backgroundColor: "red",
-            marginBottom: 5,
-            padding: 8,
-          }}
-        />
-        {errors.fullName && touched.fullName ? (
-          <Text>{errors.fullName}</Text>
-        ) : null}
+    {({
+      handleChange,
+      handleBlur,
+      handleSubmit,
+      values,
+      errors,
+      touched,
+      resetForm,
+    }) => (
+      <View style={styles.inputContainer}>
+        <View>
+          {errors.fullName && touched.fullName ? (
+            <Text>{errors.fullName}</Text>
+          ) : null}
+          <TextInput
+            placeholder="Full Name"
+            onChangeText={handleChange("fullName")}
+            onBlur={handleBlur("fullName")}
+            value={values.fullName}
+            autoCapitalize="words"
+            style={styles.inputBox}
+          />
+        </View>
 
-        <TextInput
-          placeholder="Date of Birth, put in the format YYYY-MM-DD"
-          onChangeText={handleChange("DoB")}
-          onBlur={handleBlur("DoB")}
-          value={values.DoB}
-          style={{
-            borderWidth: 1,
-            backgroundColor: "red",
-            marginBottom: 5,
-            padding: 8,
-          }}
-        />
-        {errors.DoB && touched.DoB ? <Text>{errors.DoB}</Text> : null}
+        <View>
+          {errors.DoB && touched.DoB ? <Text>{errors.DoB}</Text> : null}
+          <TextInput
+            placeholder="Date of Birth, put in the format YYYY-MM-DD"
+            onChangeText={handleChange("DoB")}
+            onBlur={handleBlur("DoB")}
+            value={values.DoB}
+            style={styles.inputBox}
+          />
+        </View>
 
-        <TextInput
-          placeholder="Email"
-          onChangeText={handleChange("email")}
-          onBlur={handleBlur("email")}
-          value={values.email}
-          autoCapitalize="none"
-          style={{
-            borderWidth: 1,
-            backgroundColor: "red",
-            marginBottom: 5,
-            padding: 8,
-          }}
-        />
-        {errors.email && touched.email ? <Text>{errors.email}</Text> : null}
+        <View>
+          {errors.email && touched.email ? <Text>{errors.email}</Text> : null}
+          <TextInput
+            placeholder="Email"
+            onChangeText={handleChange("email")}
+            onBlur={handleBlur("email")}
+            value={values.email}
+            autoCapitalize="none"
+            style={styles.inputBox}
+            keyboardType="email-address"
+          />
+        </View>
 
-        <TextInput
-          placeholder="Phone Number"
-          onChangeText={handleChange("phoneNumber")}
-          onBlur={handleBlur("phoneNumber")}
-          value={values.phoneNumber}
-          style={{
-            borderWidth: 1,
-            backgroundColor: "red",
-            marginBottom: 5,
-            padding: 8,
-          }}
-        />
-        {errors.phoneNumber && touched.phoneNumber ? (
-          <Text>{errors.phoneNumber}</Text>
-        ) : null}
+        <View>
+          {errors.phoneNumber && touched.phoneNumber ? (
+            <Text>{errors.phoneNumber}</Text>
+          ) : null}
+          <TextInput
+            placeholder="Phone Number"
+            onChangeText={handleChange("phoneNumber")}
+            onBlur={handleBlur("phoneNumber")}
+            value={values.phoneNumber}
+            style={styles.inputBox}
+            keyboardType="phone-pad"
+          />
+        </View>
 
-        <TextInput
-          placeholder="Job Title"
-          onChangeText={handleChange("jobTitle")}
-          onBlur={handleBlur("jobTitle")}
-          value={values.jobTitle}
-          style={{
-            borderWidth: 1,
-            backgroundColor: "red",
-            marginBottom: 5,
-            padding: 8,
-          }}
-        />
-        {errors.jobTitle && touched.jobTitle ? (
-          <Text>{errors.jobTitle}</Text>
-        ) : null}
+        <View>
+          {errors.jobTitle && touched.jobTitle ? (
+            <Text>{errors.jobTitle}</Text>
+          ) : null}
+          <TextInput
+            placeholder="Job Title"
+            onChangeText={handleChange("jobTitle")}
+            onBlur={handleBlur("jobTitle")}
+            value={values.jobTitle}
+            style={styles.inputBox}
+          />
+        </View>
 
-        <Button onPress={() => handleSubmit()} title="Submit" />
+        <View style={styles.submitButton}>
+          <Button onPress={() => handleSubmit()} title="Submit" />
+        </View>
+
+        <View style={styles.resetButton}>
+          <Button onPress={() => resetForm()} title="Reset" color="red" />
+        </View>
       </View>
     )}
   </Formik>
@@ -133,4 +135,13 @@ const styles = StyleSheet.create({
     backgroundColor: "green",
     height: "100%",
   },
+  inputBox: {
+    borderWidth: 1,
+    backgroundColor: "red",
+    marginBottom: 5,
+    padding: 8,
+  },
+  submitButton: {},
+  resetButton: {},
+  inputContainer: {},
 });
