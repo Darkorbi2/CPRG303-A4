@@ -2,6 +2,7 @@ import { Formik } from "formik";
 import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Yup from "yup";
+import { router } from "expo-router";
 
 const SignupSchema = Yup.object().shape({
   fullName: Yup.string().required("Full name is required"),
@@ -33,6 +34,7 @@ const MyForm = () => (
         `Email: ${values.email}\nPhone: ${values.phoneNumber}\nTitle: ${values.jobTitle}`,
       );
       resetForm();
+      router.push("/(tabs)");
     }}
   >
     {({
@@ -117,6 +119,11 @@ const MyForm = () => (
         <View style={styles.resetButton}>
           <Button onPress={() => resetForm()} title="Reset" color="red" />
         </View>
+
+        <View style={styles.logoutButton}>
+          <Text style={styles.logoutText}>Logged In </Text>
+          <Button title="Logout " onPress={() => router.push("/(tabs)")} />
+        </View>
       </View>
     )}
   </Formik>
@@ -141,7 +148,10 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     padding: 8,
   },
+
   submitButton: {},
   resetButton: {},
+  logoutButton: {},
+  logoutText: {},
   inputContainer: {},
 });
