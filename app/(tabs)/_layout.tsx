@@ -12,12 +12,18 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme === 'dark' ? 'dark' : 'light'].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
       }}
       >
-
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Sign-In',
+          tabBarIcon: ({ color }) => <Ionicons name="person-circle" size={24} color="black" />,
+        }}
+      />
       <Tabs.Screen
         name="employee"
         options={{
@@ -26,9 +32,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="index"
+        name="sign-up"
         options={{
-          title: 'Sign-In',
+          title: 'Sign-Up',
           tabBarIcon: ({ color }) => <Ionicons name="person-circle-outline" size={24} color="black" />,
         }}
       />
