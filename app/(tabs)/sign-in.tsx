@@ -4,19 +4,14 @@ import { useState } from "react";
 import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
 import * as Yup from "yup";
 
-const SignupSchema = Yup.object().shape({
-  fullName: Yup.string().required("Full name is required"),
+const SigninSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is required"),
   password: Yup.string()
     .min(8, "Password must be at least 8 characters")
     .required("Password is required"),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password")], "Passwords must match")
-    .min(8, "Password must be at least 8 characters")
-    .required("Confirm password is required"),
 });
 
-const SignupForm = () => {
+const SigninForm = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -27,12 +22,12 @@ const SignupForm = () => {
         password: "",
         confirmPassword: "",
       }}
-      validationSchema={SignupSchema}
+      validationSchema={SigninSchema}
       onSubmit={async (values, { setSubmitting, setStatus, resetForm }) => {
         Alert.alert(`Name: ${values.fullName}`, `Email: ${values.email}`);
         resetForm();
         setSubmitting(false);
-        router.push("/(tabs)/sign-in");
+        router.push("/(tabs)/employee");
       }}
     >
       {({
@@ -45,28 +40,19 @@ const SignupForm = () => {
         resetForm,
       }) => (
         <View style={styles.formContainer}>
-          {/* Full Name */}
+          {/* EMAIL */}
           <View style={styles.fieldGroup}>
-            <TextInput
-              placeholder="Full Name"
-              onChangeText={handleChange("fullName")}
-              onBlur={handleBlur("fullName")}
-              value={values.fullName}
-              style={styles.input}
-            />
-            {errors.fullName && touched.fullName && (
-              <Text style={styles.error}>{errors.fullName}</Text>
-            )}
-          </View>
+            <Text style={styles.label}>Email</Text>
 
-          {/* Email */}
-          <View style={styles.fieldGroup}>
             <TextInput
               placeholder="Email"
               onChangeText={handleChange("email")}
               onBlur={handleBlur("email")}
               value={values.email}
-              style={styles.input}
+              style={[
+                styles.input,
+                touched.email && errors.email && styles.inputError,
+              ]}
               keyboardType="email-address"
             />
             {errors.email && touched.email && (
@@ -74,55 +60,45 @@ const SignupForm = () => {
             )}
           </View>
 
-          {/* Password */}
           <View style={styles.fieldGroup}>
+            <Text style={styles.label}>Password</Text>
             <TextInput
               placeholder="Password"
               onChangeText={handleChange("password")}
               onBlur={handleBlur("password")}
               value={values.password}
-              style={styles.input}
+              style={[
+                styles.input,
+                touched.password && errors.password && styles.inputError,
+              ]}
               secureTextEntry={!showPassword}
             />
             {errors.password && touched.password && (
               <Text style={styles.error}>{errors.password}</Text>
             )}
+
+            <View style={styles.LoginButton}>
+              <Button
+                title={showPassword ? "Hide Password" : "Show Password"}
+                onPress={() => setShowPassword((prev) => !prev)}
+                color="#6B7280"
+              />
+            </View>
           </View>
 
-          {/* Confirm Pass */}
-          <View style={styles.fieldGroup}>
-            <TextInput
-              placeholder="Confirm Password"
-              onChangeText={handleChange("confirmPassword")}
-              onBlur={handleBlur("confirmPassword")}
-              value={values.confirmPassword}
-              style={styles.input}
-              secureTextEntry={!showPassword}
-            />
-          </View>
-          <Button
-            title={showPassword ? "Hide Password" : "Show Password"}
-            onPress={() => setShowPassword((prev) => !prev)}
-            color="#6B7280"
-          />
-          {errors.confirmPassword && touched.confirmPassword && (
-            <Text style={styles.error}>{errors.confirmPassword}</Text>
-          )}
-
-          <View style={styles.submitButton}>
-            <Button onPress={() => handleSubmit()} title="Submit" />
+          <View style={styles.LoginButton}>
+            <Button onPress={() => handleSubmit()} title="Login" />
           </View>
 
-          <View style={styles.resetButton}>
-            <Button onPress={() => resetForm()} title="Reset" color="red" />
-          </View>
+          <View style={styles.registerButton}>
+            <Text style={styles.signupText}>Not Registered? </Text>
 
-          <View style={styles.submitButton}>
-            <Text style={styles.signupText}>Already Registered? </Text>
-            <Button
-              title="Sign In "
-              onPress={() => router.push("/(tabs)/employee")}
-            />
+            <View style={styles.signupButton}>
+              <Button
+                title="Sign Up"
+                onPress={() => router.push("/(tabs)/sign-up")}
+              />
+            </View>
           </View>
         </View>
       )}
@@ -133,7 +109,7 @@ const SignupForm = () => {
 export default function HomeScreen() {
   return (
     <View style={styles.bg}>
-      <SignupForm />
+      <SigninForm />
     </View>
   );
 }
@@ -206,16 +182,18 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  submitButton: {
+  LoginButton: {
     marginTop: 8,
     borderRadius: 10,
     overflow: "hidden",
   },
 
   error: {
-    color: "black",
+    color: "red",
     fontSize: 14,
   },
-  resetButton: { marginTop: 8, borderRadius: 10, overflow: "hidden" },
+
+  signupButton: { marginTop: 8, borderRadius: 10, overflow: "hidden" },
+  registerButton: {},
   signupText: {},
 });
