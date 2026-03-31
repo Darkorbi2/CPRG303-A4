@@ -1,8 +1,10 @@
 import { router } from "expo-router";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { Formik } from "formik";
 import { useState } from "react";
 import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
 import * as Yup from "yup";
+import { auth } from "../../config/firebase";
 
 const SigninSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is required"),
@@ -17,17 +19,39 @@ const SigninForm = () => {
   return (
     <Formik
       initialValues={{
-        fullName: "",
         email: "",
         password: "",
-        confirmPassword: "",
       }}
       validationSchema={SigninSchema}
       onSubmit={async (values, { setSubmitting, setStatus, resetForm }) => {
-        Alert.alert(`Name: ${values.fullName}`, `Email: ${values.email}`);
-        resetForm();
-        setSubmitting(false);
-        router.push("/(tabs)/employee");
+        try {
+          await signInWithEmailAndPassword(auth, values.email, values.password);
+          resetForm();
+        } catch (error: any) {
+          let message = "An unknown error occurred. Please try again.";
+          if (error.code) {
+            switch (error.code) {
+              case "auth/invalid-email":
+                message = "That email is invalid.";
+                break;
+              case "auth/user-disabled":
+                message = "This user account has been disabled.";
+                break;
+              case "auth/user-not-found":
+                message = "No user found with this email.";
+                break;
+              case "auth/wrong-password":
+                message = "The password is incorrect.";
+                break;
+              case "auth/too-many-requests":
+                message = "Too many login attempts. Please try again later.";
+                break;
+            }
+          }
+          Alert.alert("Login Error", message);
+        } finally {
+          setSubmitting(false);
+        }
       }}
     >
       {({
@@ -72,6 +96,8 @@ const SigninForm = () => {
                 touched.password && errors.password && styles.inputError,
               ]}
               secureTextEntry={!showPassword}
+              keyboardType="default"
+              autoCapitalize="none"
             />
             {errors.password && touched.password && (
               <Text style={styles.error}>{errors.password}</Text>

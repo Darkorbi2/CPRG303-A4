@@ -1,8 +1,10 @@
 import { router } from "expo-router";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Formik } from "formik";
 import { useState } from "react";
 import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
 import * as Yup from "yup";
+import { auth } from "../../config/firebase";
 
 const SignupSchema = Yup.object().shape({
   fullName: Yup.string().required("Full name is required"),
@@ -19,6 +21,47 @@ const SignupSchema = Yup.object().shape({
 const SignupForm = () => {
   const [showPassword, setShowPassword] = useState(false);
 
+  const handleSignUp = async (
+    fullName: string,
+    email: string,
+    password: string,
+    resetForm: () => void,
+    setSubmitting: (isSubmitting: boolean) => void,
+  ) => {
+    try {
+      setSubmitting(true);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+
+      resetForm();
+      router.replace("/(tabs)/protected/employee");
+    } catch (error: any) {
+      let message = "An unknown error occurred. Please try again.";
+      if (error.code) {
+        switch (error.code) {
+          case "auth/email-already-in-use":
+            message = "This email is already in use.";
+            break;
+          case "auth/invalid-email":
+            message = "That email is invalid.";
+            break;
+          case "auth/weak-password":
+            message =
+              "Password is too weak. Please choose a stronger password.";
+            break;
+          default:
+            message = error.message || message;
+        }
+      }
+      Alert.alert("Sign Up Error", message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <Formik
       initialValues={{
@@ -28,11 +71,14 @@ const SignupForm = () => {
         confirmPassword: "",
       }}
       validationSchema={SignupSchema}
-      onSubmit={async (values, { setSubmitting, setStatus, resetForm }) => {
-        Alert.alert(`Name: ${values.fullName}`, `Email: ${values.email}`);
-        resetForm();
-        setSubmitting(false);
-        router.push("/(tabs)/sign-in");
+      onSubmit={async (values, { setSubmitting, resetForm }) => {
+        await handleSignUp(
+          values.fullName,
+          values.email,
+          values.password,
+          resetForm,
+          setSubmitting,
+        );
       }}
     >
       {({
@@ -52,7 +98,10 @@ const SignupForm = () => {
               onChangeText={handleChange("fullName")}
               onBlur={handleBlur("fullName")}
               value={values.fullName}
-              style={styles.input}
+              style={[
+                styles.input,
+                touched.fullName && errors.fullName && styles.inputError,
+              ]}
             />
             {errors.fullName && touched.fullName && (
               <Text style={styles.error}>{errors.fullName}</Text>
@@ -66,8 +115,12 @@ const SignupForm = () => {
               onChangeText={handleChange("email")}
               onBlur={handleBlur("email")}
               value={values.email}
-              style={styles.input}
+              style={[
+                styles.input,
+                touched.email && errors.email && styles.inputError,
+              ]}
               keyboardType="email-address"
+              autoCapitalize="none"
             />
             {errors.email && touched.email && (
               <Text style={styles.error}>{errors.email}</Text>
@@ -81,33 +134,44 @@ const SignupForm = () => {
               onChangeText={handleChange("password")}
               onBlur={handleBlur("password")}
               value={values.password}
-              style={styles.input}
+              style={[
+                styles.input,
+                touched.password && errors.password && styles.inputError,
+              ]}
               secureTextEntry={!showPassword}
+              autoCapitalize="none"
             />
             {errors.password && touched.password && (
               <Text style={styles.error}>{errors.password}</Text>
             )}
           </View>
 
-          {/* Confirm Pass */}
+          {/* Confirm Password */}
           <View style={styles.fieldGroup}>
             <TextInput
               placeholder="Confirm Password"
               onChangeText={handleChange("confirmPassword")}
               onBlur={handleBlur("confirmPassword")}
               value={values.confirmPassword}
-              style={styles.input}
+              style={[
+                styles.input,
+                touched.confirmPassword &&
+                  errors.confirmPassword &&
+                  styles.inputError,
+              ]}
               secureTextEntry={!showPassword}
+              autoCapitalize="none"
             />
+            {errors.confirmPassword && touched.confirmPassword && (
+              <Text style={styles.error}>{errors.confirmPassword}</Text>
+            )}
           </View>
+
           <Button
             title={showPassword ? "Hide Password" : "Show Password"}
             onPress={() => setShowPassword((prev) => !prev)}
             color="#6B7280"
           />
-          {errors.confirmPassword && touched.confirmPassword && (
-            <Text style={styles.error}>{errors.confirmPassword}</Text>
-          )}
 
           <View style={styles.submitButton}>
             <Button onPress={() => handleSubmit()} title="Submit" />
@@ -120,8 +184,8 @@ const SignupForm = () => {
           <View style={styles.submitButton}>
             <Text style={styles.signupText}>Already Registered? </Text>
             <Button
-              title="Sign In "
-              onPress={() => router.push("/(tabs)/employee")}
+              title="Sign In"
+              onPress={() => router.push("/(tabs)/sign-in")}
             />
           </View>
         </View>
@@ -175,14 +239,6 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
 
-  label: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.textLabel,
-    marginBottom: 6,
-    letterSpacing: 0.3,
-  },
-
   input: {
     borderWidth: 1.5,
     borderColor: colors.border,
@@ -199,11 +255,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bgError,
   },
 
-  errorText: {
-    marginTop: 5,
-    fontSize: 12,
+  error: {
     color: colors.textError,
-    fontWeight: "500",
+    fontSize: 14,
   },
 
   submitButton: {
@@ -212,10 +266,16 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
 
-  error: {
-    color: "black",
-    fontSize: 14,
+  resetButton: {
+    marginTop: 8,
+    borderRadius: 10,
+    overflow: "hidden",
   },
-  resetButton: { marginTop: 8, borderRadius: 10, overflow: "hidden" },
-  signupText: {},
+
+  signupText: {
+    marginBottom: 6,
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.textLabel,
+  },
 });
