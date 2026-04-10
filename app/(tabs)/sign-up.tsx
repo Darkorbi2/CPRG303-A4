@@ -1,8 +1,16 @@
 import { router } from "expo-router";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { Formik } from "formik";
 import { useState } from "react";
-import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Alert,
+  Button,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import * as Yup from "yup";
 import { auth } from "../../config/firebase";
 
@@ -14,9 +22,22 @@ const SignupSchema = Yup.object().shape({
     .required("Password is required"),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password")], "Passwords must match")
-    .min(8, "Password must be at least 8 characters")
     .required("Confirm password is required"),
 });
+
+const colors = {
+  primary: "#2563EB",
+  secondary: "#6B7280",
+  danger: "#EF4444",
+  background: "#F3F4F6",
+  card: "#FFFFFF",
+  border: "#D1D5DB",
+  textMain: "#111827",
+  textSub: "#6B7280",
+  textError: "#DC2626",
+  inputBg: "#FFFFFF",
+  inputErrorBg: "#FEF2F2",
+};
 
 const SignupForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -30,14 +51,11 @@ const SignupForm = () => {
   ) => {
     try {
       setSubmitting(true);
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
-
+      await createUserWithEmailAndPassword(auth, email, password);
+      await signOut(auth);
       resetForm();
-      router.replace("/(tabs)/protected/employee");
+      Alert.alert("Success", "Account created successfully. Please sign in.");
+      router.replace("./index");
     } catch (error: any) {
       let message = "An unknown error occurred. Please try again.";
       if (error.code) {
@@ -49,8 +67,7 @@ const SignupForm = () => {
             message = "That email is invalid.";
             break;
           case "auth/weak-password":
-            message =
-              "Password is too weak. Please choose a stronger password.";
+            message = "Password is too weak. Please choose a stronger password.";
             break;
           default:
             message = error.message || message;
@@ -81,20 +98,13 @@ const SignupForm = () => {
         );
       }}
     >
-      {({
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        values,
-        errors,
-        touched,
-        resetForm,
-      }) => (
+      {({ handleChange, handleBlur, handleSubmit, values, errors, touched, resetForm }) => (
         <View style={styles.formContainer}>
-          {/* Full Name */}
           <View style={styles.fieldGroup}>
+            <Text style={styles.label}>Full Name</Text>
             <TextInput
-              placeholder="Full Name"
+              placeholder="Enter your full name"
+              placeholderTextColor={colors.textSub}
               onChangeText={handleChange("fullName")}
               onBlur={handleBlur("fullName")}
               value={values.fullName}
@@ -104,14 +114,15 @@ const SignupForm = () => {
               ]}
             />
             {errors.fullName && touched.fullName && (
-              <Text style={styles.error}>{errors.fullName}</Text>
+              <Text style={styles.errorText}>{errors.fullName}</Text>
             )}
           </View>
 
-          {/* Email */}
           <View style={styles.fieldGroup}>
+            <Text style={styles.label}>Email</Text>
             <TextInput
-              placeholder="Email"
+              placeholder="Enter your email"
+              placeholderTextColor={colors.textSub}
               onChangeText={handleChange("email")}
               onBlur={handleBlur("email")}
               value={values.email}
@@ -123,14 +134,15 @@ const SignupForm = () => {
               autoCapitalize="none"
             />
             {errors.email && touched.email && (
-              <Text style={styles.error}>{errors.email}</Text>
+              <Text style={styles.errorText}>{errors.email}</Text>
             )}
           </View>
 
-          {/* Password */}
           <View style={styles.fieldGroup}>
+            <Text style={styles.label}>Password</Text>
             <TextInput
-              placeholder="Password"
+              placeholder="Create a password"
+              placeholderTextColor={colors.textSub}
               onChangeText={handleChange("password")}
               onBlur={handleBlur("password")}
               value={values.password}
@@ -142,14 +154,15 @@ const SignupForm = () => {
               autoCapitalize="none"
             />
             {errors.password && touched.password && (
-              <Text style={styles.error}>{errors.password}</Text>
+              <Text style={styles.errorText}>{errors.password}</Text>
             )}
           </View>
 
-          {/* Confirm Password */}
           <View style={styles.fieldGroup}>
+            <Text style={styles.label}>Confirm Password</Text>
             <TextInput
-              placeholder="Confirm Password"
+              placeholder="Confirm your password"
+              placeholderTextColor={colors.textSub}
               onChangeText={handleChange("confirmPassword")}
               onBlur={handleBlur("confirmPassword")}
               value={values.confirmPassword}
@@ -163,30 +176,35 @@ const SignupForm = () => {
               autoCapitalize="none"
             />
             {errors.confirmPassword && touched.confirmPassword && (
-              <Text style={styles.error}>{errors.confirmPassword}</Text>
+              <Text style={styles.errorText}>{errors.confirmPassword}</Text>
             )}
           </View>
 
-          <Button
-            title={showPassword ? "Hide Password" : "Show Password"}
-            onPress={() => setShowPassword((prev) => !prev)}
-            color="#6B7280"
-          />
-
-          <View style={styles.submitButton}>
-            <Button onPress={() => handleSubmit()} title="Submit" />
-          </View>
-
-          <View style={styles.resetButton}>
-            <Button onPress={() => resetForm()} title="Reset" color="red" />
-          </View>
-
-          <View style={styles.submitButton}>
-            <Text style={styles.signupText}>Already Registered? </Text>
+          <View style={styles.buttonSpacing}>
             <Button
-              title="Sign In"
-              onPress={() => router.push("/(tabs)/sign-in")}
+              title={showPassword ? "Hide Password" : "Show Password"}
+              onPress={() => setShowPassword((prev) => !prev)}
+              color={colors.secondary}
             />
+          </View>
+
+          <View style={styles.buttonSpacing}>
+            <Button title="Create Account" onPress={() => handleSubmit()} color={colors.primary} />
+          </View>
+
+          <View style={styles.buttonSpacing}>
+            <Button title="Reset Form" onPress={() => resetForm()} color={colors.secondary} />
+          </View>
+
+          <View style={styles.linkSection}>
+            <Text style={styles.linkText}>Already registered?</Text>
+            <View style={styles.linkButton}>
+              <Button
+                title="Go to Sign In"
+                onPress={() => router.replace("/")}
+                color={colors.primary}
+              />
+            </View>
           </View>
         </View>
       )}
@@ -194,88 +212,95 @@ const SignupForm = () => {
   );
 };
 
-export default function HomeScreen() {
+export default function SignUpScreen() {
   return (
-    <View style={styles.bg}>
+    <SafeAreaView style={styles.bg}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.title}>Create Account</Text>
+        <Text style={styles.subtitle}>Register to get started</Text>
+      </View>
       <SignupForm />
-    </View>
+    </SafeAreaView>
   );
 }
 
-const colors = {
-  primary: "#2563EB",
-  primaryLight: "#EFF6FF",
-  border: "#D1D5DB",
-  borderFocus: "#2563EB",
-  borderError: "#EF4444",
-  bgInput: "#FFFFFF",
-  bgError: "#FEF2F2",
-  textMain: "#111827",
-  textLabel: "#374151",
-  textError: "#DC2626",
-  placeholder: "#9CA3AF",
-  bgScreen: "#F9FAFB",
-};
-
 const styles = StyleSheet.create({
   bg: {
-    backgroundColor: colors.bgScreen,
     flex: 1,
+    backgroundColor: colors.background,
   },
-
+  headerContainer: {
+    alignItems: "center",
+    marginTop: 30,
+    marginBottom: 10,
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: colors.textMain,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: colors.textSub,
+    marginTop: 6,
+  },
   formContainer: {
     margin: 20,
     padding: 24,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    backgroundColor: colors.card,
+    borderRadius: 18,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowRadius: 10,
+    elevation: 4,
   },
-
   fieldGroup: {
     marginBottom: 18,
   },
-
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.textMain,
+    marginBottom: 8,
+  },
   input: {
     borderWidth: 1.5,
     borderColor: colors.border,
-    borderRadius: 10,
-    backgroundColor: colors.bgInput,
+    borderRadius: 12,
+    backgroundColor: colors.inputBg,
     paddingHorizontal: 14,
-    paddingVertical: 11,
+    paddingVertical: 13,
     fontSize: 15,
     color: colors.textMain,
   },
-
   inputError: {
-    borderColor: colors.borderError,
-    backgroundColor: colors.bgError,
+    borderColor: colors.danger,
+    backgroundColor: colors.inputErrorBg,
   },
-
-  error: {
+  errorText: {
+    marginTop: 6,
+    fontSize: 13,
     color: colors.textError,
-    fontSize: 14,
   },
-
-  submitButton: {
-    marginTop: 8,
+  buttonSpacing: {
+    marginTop: 10,
     borderRadius: 10,
     overflow: "hidden",
   },
-
-  resetButton: {
-    marginTop: 8,
+  linkSection: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  linkText: {
+    fontSize: 14,
+    color: colors.textSub,
+    marginBottom: 8,
+  },
+  linkButton: {
+    width: "100%",
     borderRadius: 10,
     overflow: "hidden",
-  },
-
-  signupText: {
-    marginBottom: 6,
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textLabel,
   },
 });

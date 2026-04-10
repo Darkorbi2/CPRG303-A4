@@ -44,7 +44,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="sign-in"
+        name="index"
         options={{
           title: "Sign-In",
           href: user ? null : undefined,
@@ -66,15 +66,15 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="protected/employee"
-        options={{
-          title: "Employee",
-          href: !user ? null : undefined,
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="briefcase" size={24} color={color} />
-          ),
-        }}
-      />
+  name="protected"
+  options={{
+    title: "Employee",
+    href: !user ? null : "/protected/employee",
+    tabBarIcon: ({ color }) => (
+      <Ionicons name="briefcase" size={24} color={color} />
+    ),
+  }}
+/>
     </Tabs>
   );
 }

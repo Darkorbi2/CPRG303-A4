@@ -26,7 +26,7 @@ export default function ProtectedLayout() {
   }
 
   if (!user) {
-    return <Redirect href="/(tabs)/sign-in" />;
+    return <Redirect href="./index" />;
   }
 
   return <Slot />;

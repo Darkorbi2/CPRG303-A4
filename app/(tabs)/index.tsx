@@ -2,7 +2,15 @@ import { router } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { Formik } from "formik";
 import { useState } from "react";
-import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Alert,
+  Button,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import * as Yup from "yup";
 import { auth } from "../../config/firebase";
 
@@ -12,6 +20,20 @@ const SigninSchema = Yup.object().shape({
     .min(8, "Password must be at least 8 characters")
     .required("Password is required"),
 });
+
+const colors = {
+  primary: "#2563EB",
+  secondary: "#6B7280",
+  danger: "#EF4444",
+  background: "#F3F4F6",
+  card: "#FFFFFF",
+  border: "#D1D5DB",
+  textMain: "#111827",
+  textSub: "#6B7280",
+  textError: "#DC2626",
+  inputBg: "#FFFFFF",
+  inputErrorBg: "#FEF2F2",
+};
 
 const SigninForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -23,10 +45,11 @@ const SigninForm = () => {
         password: "",
       }}
       validationSchema={SigninSchema}
-      onSubmit={async (values, { setSubmitting, setStatus, resetForm }) => {
+      onSubmit={async (values, { setSubmitting, resetForm }) => {
         try {
           await signInWithEmailAndPassword(auth, values.email, values.password);
           resetForm();
+          router.replace("/protected/employee");
         } catch (error: any) {
           let message = "An unknown error occurred. Please try again.";
           if (error.code) {
@@ -54,22 +77,13 @@ const SigninForm = () => {
         }
       }}
     >
-      {({
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        values,
-        errors,
-        touched,
-        resetForm,
-      }) => (
+      {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
         <View style={styles.formContainer}>
-          {/* EMAIL */}
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Email</Text>
-
             <TextInput
-              placeholder="Email"
+              placeholder="Enter your email"
+              placeholderTextColor={colors.textSub}
               onChangeText={handleChange("email")}
               onBlur={handleBlur("email")}
               value={values.email}
@@ -78,16 +92,18 @@ const SigninForm = () => {
                 touched.email && errors.email && styles.inputError,
               ]}
               keyboardType="email-address"
+              autoCapitalize="none"
             />
             {errors.email && touched.email && (
-              <Text style={styles.error}>{errors.email}</Text>
+              <Text style={styles.errorText}>{errors.email}</Text>
             )}
           </View>
 
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Password</Text>
             <TextInput
-              placeholder="Password"
+              placeholder="Enter your password"
+              placeholderTextColor={colors.textSub}
               onChangeText={handleChange("password")}
               onBlur={handleBlur("password")}
               value={values.password}
@@ -96,33 +112,32 @@ const SigninForm = () => {
                 touched.password && errors.password && styles.inputError,
               ]}
               secureTextEntry={!showPassword}
-              keyboardType="default"
               autoCapitalize="none"
             />
             {errors.password && touched.password && (
-              <Text style={styles.error}>{errors.password}</Text>
+              <Text style={styles.errorText}>{errors.password}</Text>
             )}
-
-            <View style={styles.LoginButton}>
-              <Button
-                title={showPassword ? "Hide Password" : "Show Password"}
-                onPress={() => setShowPassword((prev) => !prev)}
-                color="#6B7280"
-              />
-            </View>
           </View>
 
-          <View style={styles.LoginButton}>
-            <Button onPress={() => handleSubmit()} title="Login" />
+          <View style={styles.buttonSpacing}>
+            <Button
+              title={showPassword ? "Hide Password" : "Show Password"}
+              onPress={() => setShowPassword((prev) => !prev)}
+              color={colors.secondary}
+            />
           </View>
 
-          <View style={styles.registerButton}>
-            <Text style={styles.signupText}>Not Registered? </Text>
+          <View style={styles.buttonSpacing}>
+            <Button title="Login" onPress={() => handleSubmit()} color={colors.primary} />
+          </View>
 
-            <View style={styles.signupButton}>
+          <View style={styles.linkSection}>
+            <Text style={styles.linkText}>Not registered yet?</Text>
+            <View style={styles.linkButton}>
               <Button
-                title="Sign Up"
-                onPress={() => router.push("/(tabs)/sign-up")}
+                title="Create Account"
+                onPress={() => router.push("/sign-up")}
+                color={colors.primary}
               />
             </View>
           </View>
@@ -132,94 +147,95 @@ const SigninForm = () => {
   );
 };
 
-export default function HomeScreen() {
+export default function SignInScreen() {
   return (
-    <View style={styles.bg}>
+    <SafeAreaView style={styles.bg}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.title}>Welcome Back</Text>
+        <Text style={styles.subtitle}>Sign in to continue</Text>
+      </View>
       <SigninForm />
-    </View>
+    </SafeAreaView>
   );
 }
 
-const colors = {
-  primary: "#2563EB",
-  primaryLight: "#EFF6FF",
-  border: "#D1D5DB",
-  borderFocus: "#2563EB",
-  borderError: "#EF4444",
-  bgInput: "#FFFFFF",
-  bgError: "#FEF2F2",
-  textMain: "#111827",
-  textLabel: "#374151",
-  textError: "#DC2626",
-  placeholder: "#9CA3AF",
-  bgScreen: "#F9FAFB",
-};
-
 const styles = StyleSheet.create({
   bg: {
-    backgroundColor: colors.bgScreen,
     flex: 1,
+    backgroundColor: colors.background,
   },
-
+  headerContainer: {
+    alignItems: "center",
+    marginTop: 40,
+    marginBottom: 10,
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: colors.textMain,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: colors.textSub,
+    marginTop: 6,
+  },
   formContainer: {
     margin: 20,
     padding: 24,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    backgroundColor: colors.card,
+    borderRadius: 18,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowRadius: 10,
+    elevation: 4,
   },
-
   fieldGroup: {
     marginBottom: 18,
   },
-
   label: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600",
-    color: colors.textLabel,
-    marginBottom: 6,
-    letterSpacing: 0.3,
+    color: colors.textMain,
+    marginBottom: 8,
   },
-
   input: {
     borderWidth: 1.5,
     borderColor: colors.border,
-    borderRadius: 10,
-    backgroundColor: colors.bgInput,
+    borderRadius: 12,
+    backgroundColor: colors.inputBg,
     paddingHorizontal: 14,
-    paddingVertical: 11,
+    paddingVertical: 13,
     fontSize: 15,
     color: colors.textMain,
   },
-
   inputError: {
-    borderColor: colors.borderError,
-    backgroundColor: colors.bgError,
+    borderColor: colors.danger,
+    backgroundColor: colors.inputErrorBg,
   },
-
   errorText: {
-    marginTop: 5,
-    fontSize: 12,
+    marginTop: 6,
+    fontSize: 13,
     color: colors.textError,
-    fontWeight: "500",
   },
-
-  LoginButton: {
-    marginTop: 8,
+  buttonSpacing: {
+    marginTop: 10,
     borderRadius: 10,
     overflow: "hidden",
   },
-
-  error: {
-    color: "red",
-    fontSize: 14,
+  linkSection: {
+    marginTop: 20,
+    alignItems: "center",
   },
-
-  signupButton: { marginTop: 8, borderRadius: 10, overflow: "hidden" },
-  registerButton: {},
-  signupText: {},
+  linkText: {
+    fontSize: 14,
+    color: colors.textSub,
+    marginBottom: 8,
+  },
+  linkButton: {
+    width: "100%",
+    borderRadius: 10,
+    overflow: "hidden",
+  },
 });
