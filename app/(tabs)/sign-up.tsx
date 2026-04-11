@@ -79,6 +79,7 @@ const SignupForm = () => {
         }
       }
       Alert.alert("Sign Up Error", message);
+      router.replace("/sign-up");
     } finally {
       setSubmitting(false);
     }

@@ -77,7 +77,14 @@ const SigninForm = () => {
         }
       }}
     >
-      {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+      {({
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        values,
+        errors,
+        touched,
+      }) => (
         <View style={styles.formContainer}>
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Email</Text>
@@ -128,7 +135,11 @@ const SigninForm = () => {
           </View>
 
           <View style={styles.buttonSpacing}>
-            <Button title="Login" onPress={() => handleSubmit()} color={colors.primary} />
+            <Button
+              title="Login"
+              onPress={() => handleSubmit()}
+              color={colors.primary}
+            />
           </View>
 
           <View style={styles.linkSection}>

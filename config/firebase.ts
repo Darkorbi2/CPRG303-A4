@@ -2,17 +2,31 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { initializeApp } from "firebase/app";
 import { getReactNativePersistence, initializeAuth } from "firebase/auth";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+
+const apiKey = (process.env.EXPO_PUBLIC_API_KEY || "").replace(/"/g, "");
+
+const authDomain = (process.env.EXPO_PUBLIC_AUTH_DOMAIN || "").replace(
+  /"/g,
+  "",
+);
+const projectId = (process.env.EXPO_PUBLIC_PROJECT_ID || "").replace(/"/g, "");
+const storageBucket = (process.env.EXPO_PUBLIC_STORAGE_BUCKET || "").replace(
+  /"/g,
+  "",
+);
+const messagingSenderId = (
+  process.env.EXPO_PUBLIC_MESSAGING_SENDER_ID || ""
+).trim();
+const appId = (process.env.EXPO_PUBLIC_APP_ID || "").replace(/"/g, "");
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDqHTpyeW1mY2Xty1L4kbqLam9OwruaiSo",
-  authDomain: "authenticationprototype-713a2.firebaseapp.com",
-  projectId: "authenticationprototype-713a2",
-  storageBucket: "authenticationprototype-713a2.firebasestorage.app",
-  messagingSenderId: "400541491719",
-  appId: "1:400541491719:web:6a3ca657e044dbddf380a2",
+  apiKey: apiKey,
+  authDomain: authDomain,
+  projectId: projectId,
+  storageBucket: storageBucket,
+  messagingSenderId: messagingSenderId,
+  appId: appId,
 };
 
 // Initialize Firebase
