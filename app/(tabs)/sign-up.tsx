@@ -1,5 +1,9 @@
 import { router } from "expo-router";
-import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 import { Formik } from "formik";
 import { useState } from "react";
 import {
@@ -53,9 +57,9 @@ const SignupForm = () => {
       setSubmitting(true);
       await createUserWithEmailAndPassword(auth, email, password);
       await signOut(auth);
+      await signInWithEmailAndPassword(auth, email, password);
       resetForm();
-      Alert.alert("Success", "Account created successfully. Please sign in.");
-      router.replace("./index");
+      router.replace("/protected/employee");
     } catch (error: any) {
       let message = "An unknown error occurred. Please try again.";
       if (error.code) {
@@ -67,7 +71,8 @@ const SignupForm = () => {
             message = "That email is invalid.";
             break;
           case "auth/weak-password":
-            message = "Password is too weak. Please choose a stronger password.";
+            message =
+              "Password is too weak. Please choose a stronger password.";
             break;
           default:
             message = error.message || message;
@@ -96,9 +101,18 @@ const SignupForm = () => {
           resetForm,
           setSubmitting,
         );
+        router.replace("/protected/employee");
       }}
     >
-      {({ handleChange, handleBlur, handleSubmit, values, errors, touched, resetForm }) => (
+      {({
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        values,
+        errors,
+        touched,
+        resetForm,
+      }) => (
         <View style={styles.formContainer}>
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Full Name</Text>
@@ -189,11 +203,19 @@ const SignupForm = () => {
           </View>
 
           <View style={styles.buttonSpacing}>
-            <Button title="Create Account" onPress={() => handleSubmit()} color={colors.primary} />
+            <Button
+              title="Create Account"
+              onPress={() => handleSubmit()}
+              color={colors.primary}
+            />
           </View>
 
           <View style={styles.buttonSpacing}>
-            <Button title="Reset Form" onPress={() => resetForm()} color={colors.secondary} />
+            <Button
+              title="Reset Form"
+              onPress={() => resetForm()}
+              color={colors.secondary}
+            />
           </View>
 
           <View style={styles.linkSection}>
